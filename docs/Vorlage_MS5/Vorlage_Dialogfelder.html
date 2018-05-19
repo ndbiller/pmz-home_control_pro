@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+    <head>
+        <title>HomeControlPro / Dialogfenster</title>
+        <meta charset="utf-8">
+
+        <!-- JQuery Bibliothek -->
+        <script src="jquery-3.1.1.min.js"  type="application/javascript"></script>
+        <!-- SimpleModal 1.4.4 - jQuery Plugin 
+Informationen, Demos und Dokumentation auf http://www.ericmmartin.com/projects/simplemodal/
+-->
+        <script src="jquery.simplemodal.1.4.4.min.js"  type="application/javascript"></script>
+
+        <!-- Stylesheet Snippets / bitte in eigenes Stylesheet übernehmen -->
+        <style>
+            footer
+            {   
+                position: fixed;
+                width:100%;
+                left:0;
+                bottom:0;
+                background:blue;
+                text-align:center;
+                padding:1em;
+            }
+
+            /* Dialoge erst mal verstecken */
+            #dialogServer, #dialogWelcome
+            {
+                display: none;
+            }
+
+            /* Dialog als Box anzeigen */
+            .dialog
+            {
+                padding:1em;
+                border:1px solid;
+                background-color:white;
+            }
+
+
+        </style>
+
+        <!-- Script Snippets / bitte passend in eigene Script-Datei übernehmen  -->
+        <script type="application/javascript">
+
+            // globale Variable für den Hostnamen
+            // -> verschwindet leider beim neu laden :-(
+            var serverHostName;
+
+            // Definiere pressEnter-Event, benötigt für Text-Felder
+            $.fn.pressEnter = function(fn) {
+                return this.each(function() {
+                    $(this).bind('enterPress', fn);
+                    $(this).keyup(function(e) {
+                        if (e.keyCode == 13) {
+                            $(this).trigger("enterPress");
+                        }
+                    });
+                });
+            };
+
+
+            // On Device Ready - wird nach dem Laden des Dokuments ausgeführt (wenn das DOM vollständig aufgebaut wurde)
+            $(document).ready(function() {
+                onDeviceReady();
+            });
+
+
+            // Initialisierung
+            function onDeviceReady() {
+
+                // Servername standardmäßig auf aktuellen Host aktualisieren - hier könnte man vielleicht eine HTML5-API verwenden?!
+                updateServer(location.host);
+
+                // Button #mainSetting -> Dialogfenster anzeigen 
+                // (ggf. ID von mainSettings passend zu Button im Footer anpassen)
+                $("#mainSettings").unbind('click').click(function() {
+                    $("#tfdIpAdress").val(serverHostName);
+                    $("#dialogServer").modal({onOpen: function (dialog) {
+                        dialog.container.show();
+                        /* Animiere Fade in */
+                        dialog.data.fadeIn('slow');
+                    }});
+                });
+
+
+                // Button #setServer ->Verarbeite Klick auf Button setServer
+                $('#setServer').unbind('click').click(function() {
+                    // Get value from text-field
+                    updateServer($('#tfdIpAdress').val());
+                    // close dialog
+                    $.modal.close();
+                });
+
+                // Verwende auch Enter-Taste im Textfeld
+                $("#tfdIpAdress").pressEnter(function() {
+                    $("#setServer").trigger('click');
+                });
+                
+                // Blende Willkommen-Dialog ein
+                $("#dialogWelcome").modal();
+            }
+
+            /* Aktualisiere Server-Name */
+            function updateServer(hostname)
+            {
+
+                /* Default hostname: http://localhost:8080 */
+                if (hostname === "")
+                {
+                    hostname = "http://localhost:8080";
+                }
+
+                /* Add http:// if no valid protocol was found in URI */
+                if ((hostname.substring(0, 7) != "http://") && (hostname.substring(0, 8) != "https://")) {
+                    hostname = "http://" + hostname;
+                }
+
+                /* Remove trailing / */
+                hostname = hostname.replace(/\/$/, "");
+                /* Update dialog */
+                $("#tfdIpAdress").val(hostname);
+                /* Update setting - vielleicht besser mit HTML5-API?*/
+                serverHostName = hostname;
+
+            }
+        </script>
+
+
+    </head>
+    <body>
+
+        <!-- Dialog für die Server-IP-Adresse / Bitte in eigene HTML-Datei übernehmen -->
+        <div id="dialogServer" class="dialog">
+            <h2>Server konfigurieren</h2>
+            <div class="ui-field-contain">
+                <label for="tfdIpAdress">Bitte geben Sie die IP-Adresse des Servers ein:</label><br/><input id="tfdIpAdress" type="text" ><br/>
+                <div class="buttonBar">
+                    <button type="button" id="setServer">OK</button>
+                    <button type="button" id="cancelServer" class="simplemodal-close">Abbrechen</button></div>
+            </div>
+        </div>
+
+        <!-- Dialog für die erste Begrüßung / Bitte in eigene HTML-Datei übernehmen -->
+        <div id="dialogWelcome" class="dialog">
+            <h2>Herlich Willkommen</h2>
+            <p>Willkommen bei HomeControl Pro!</p>
+            <div class="ui-field-contain">
+                <div class="buttonBar">                        
+                    <button type="button" id="closeWelcome" class="simplemodal-close">Schließen</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <button type="button" id="mainSettings">Einstellungen</button> 
+        </footer>
+
+    </body>
+</html>

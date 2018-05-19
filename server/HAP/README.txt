@@ -1,0 +1,6 @@
+- NodeJSPortable.exe starten
+- ins Verzeichnis "server" wechseln
+- "npm install" ausführen
+- Mit "node server.js" den Server starten
+- Im Browser mit "http://localhost:8080/api/" die API testen
+- Viel Spaß :-)
